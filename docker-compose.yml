@@ -1,0 +1,44 @@
+version: '3'
+
+services:
+  database:
+    image: mysql:8.0.33
+    container_name: my-database-1
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: root
+    ports:
+      - 3306:3306
+    volumes:
+      - ./dbdata/mysql:/var/lib/mysql
+
+  mongo:
+    image: mongo:6.0
+    container_name: my-mongo-1
+    ports:
+      - 27017:27017
+    volumes:
+      - ./dbdata/mongo:/data/db
+
+  server:
+    build:
+      context: ./server
+      dockerfile: Dockerfile
+    container_name: express-server
+    environment:
+      - PORT=3000
+      - MYSQL_HOST=database
+      - MYSQL_USER=root
+      - MYSQL_PASSWORD=root
+      - MYSQL_DATABASE=
+      - MONGO_HOST=localhost
+      - MONGO_PORT=root
+      - MONGO_DB=
+    restart: always
+    depends_on:
+      - database
+      - mongo
+    ports:
+      - 3000:3000
+    volumes:
+      - ./server:/server
